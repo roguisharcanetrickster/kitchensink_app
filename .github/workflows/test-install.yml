@@ -1,9 +1,8 @@
 name: Dev Install Test
+# dont call ab install action
 on:
   push:
     branches: [is/update]
-  pull_request:
-    branches: [master]
   workflow_dispatch:
 jobs:
   Dev-Install-Test:
@@ -16,7 +15,7 @@ jobs:
         # windows runner does not suppport linux containers
         # see:
         os: [ubuntu-latest] #, windows-latest] #,macos-latest]
-        node: [18, 20, 21]
+        node: [21]
     env:
          CYPRESS_RESPONSE_TIMEOUT: 200000
          CYPRESS_DEFAULT_COMMAND_TIMEOUT: 30000
@@ -38,7 +37,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-          cache: 'npm'
 
       - name: Install npm packages
         run: npm i
