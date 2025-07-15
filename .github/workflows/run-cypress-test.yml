@@ -24,7 +24,7 @@ jobs:
       - uses: roguisharcanetrickster/ab-install-action@v1.0.4
         with:
           folder: ab
-          port: 8090
+          port: 8080
       # Up
       - name: Bring up AppBuilder
         run: |
@@ -35,11 +35,11 @@ jobs:
       - name: Debug AppBuilder Startup
         run: |
           sleep 61
-          echo "=== Checking what's listening on port 8090 ==="
-          netstat -tlnp | grep :8090 || echo "Nothing listening on port 8090"
+          echo "=== Checking what's listening on port 8080 ==="
+          netstat -tlnp | grep :8080 || echo "Nothing listening on port 8080"
           
-          echo "=== Checking if port 8090 is in use ==="
-          lsof -i :8090 || echo "Port 8090 is not in use"
+          echo "=== Checking if port 8080 is in use ==="
+          lsof -i :8080 || echo "Port 8080 is not in use"
         working-directory: ./ab
 
       - name: Docker Compose Status & Logs
