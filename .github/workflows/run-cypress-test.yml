@@ -28,7 +28,7 @@ jobs:
       # Up
       - name: Bring up AppBuilder
         run: |
-          echo "Starting AppBuilder with UP.sh..."
+          echo "Starting AppBuilder with npm run test:boot"
           npm run test:boot
         working-directory: ./ab
 
@@ -40,6 +40,17 @@ jobs:
           
           echo "=== Checking if port 8080 is in use ==="
           lsof -i :8080 || echo "Port 8080 is not in use"
+
+          echo "=== Checking what's listening on port 8080 ==="
+          netstat -tlnp | grep :8088 || echo "Nothing listening on port 8088"
+          
+          echo "=== Checking if port 8088 is in use ==="
+          lsof -i :8088 || echo "Port 8088 is not in use"
+          echo "=== Checking what's listening on port 8090 ==="
+          netstat -tlnp | grep :8090 || echo "Nothing listening on port 8090"
+          
+          echo "=== Checking if port 8090 is in use ==="
+          lsof -i :8090 || echo "Port 8090 is not in use"
         working-directory: ./ab
 
       - name: Docker Compose Status & Logs
@@ -94,14 +105,14 @@ jobs:
           fi
         working-directory: ./ab
 
-      - name: Wait for test AB
-        uses: ifaxity/wait-on-action@v1.2.1
-        with:
-          resource: http://localhost:8080
-          timeout: 300000  # 5 minutes
-          delay: 5000      # Wait 5 seconds before starting to check
-          interval: 5000   # Check every 5 seconds
-          verbose: true    
+      # - name: Wait for test AB
+      #   uses: ifaxity/wait-on-action@v1.2.1
+      #   with:
+      #     resource: http://localhost:8080
+      #     timeout: 300000  # 5 minutes
+      #     delay: 5000      # Wait 5 seconds before starting to check
+      #     interval: 5000   # Check every 5 seconds
+      #     verbose: true    
 
       - name: Run Cypress Tests
         run: npm run test:e2e:app -- --browser chrome
