@@ -20,11 +20,15 @@ jobs:
       CYPRESS_RESPONSE_TIMEOUT: 200000
       CYPRESS_DEFAULT_COMMAND_TIMEOUT: 30000
       CYPRESS_RETRIES: 2
+      STACK: test_ab
+      CYPRESS_TENANT: "admin"
+      TENANT: "admin"
     steps:
       # Setup
       - uses: roguisharcanetrickster/ab-install-action@v1.0.4
         with:
           folder: ab
+          stack: ab
           port: 8080 # this isn't related to the test port at all
       # Up
       - name: Bring up AppBuilder
@@ -35,7 +39,7 @@ jobs:
 
       - name: Debug AppBuilder Startup
         run: |
-          sleep 6001
+          sleep 601
           echo "=== Checking what's listening on port 8080 ==="
           netstat -tlnp | grep :8080 || echo "Nothing listening on port 8080"
           
