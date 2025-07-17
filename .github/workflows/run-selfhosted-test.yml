@@ -25,7 +25,7 @@ jobs:
       TENANT: "admin"
     steps:
       # Setup
-      - uses: roguisharcanetrickster/ab-install-action@v1.0.4
+      - uses: roguisharcanetrickster/ab-install-action@v1
         with:
           folder: ab
           stack: ab
