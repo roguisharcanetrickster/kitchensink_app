@@ -1,4 +1,4 @@
-name: Cypress Test
+name: Selfhost Test
 on:
   # Run on any commit to the #master branch
   push:
