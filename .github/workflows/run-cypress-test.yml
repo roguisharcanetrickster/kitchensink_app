@@ -1,8 +1,8 @@
 name: Cypress Test
 on:
   # Run on any commit to the #master branch
-  push:
-    branches: [master]
+  # push:
+  #   branches: [master]
 
   # Run on pull requests into the #master branch
 
@@ -16,50 +16,84 @@ jobs:
   cypress-test:
     runs-on: ubuntu-latest
     env:
+      CYPRESS_BASE_URL: http://127.0.0.1:8088
       CYPRESS_RESPONSE_TIMEOUT: 200000
       CYPRESS_DEFAULT_COMMAND_TIMEOUT: 30000
       CYPRESS_RETRIES: 2
+      STACK: test_ab
+      CYPRESS_TENANT: "admin"
+      TENANT: "admin"
     steps:
       # Setup
-      - uses: CruGlobal/ab-install-action@v1
+      - uses: roguisharcanetrickster/ab-install-action@v1.0.4
         with:
           folder: ab
-          port: 8080
-
+          stack: ab
+          port: 8080 # this isn't related to the test port at all
       # Up
       - name: Bring up AppBuilder
-        run: ./UP.sh -q -t
+        run: |
+          echo "Starting AppBuilder with npm run test:boot"
+          npm run test:boot
+        working-directory: ./ab
+
+      # - name: Debug AppBuilder Startup
+      #   run: |
+      #     sleep 601
+      #     echo "=== Checking what's listening on port 8080 ==="
+      #     netstat -tlnp | grep :8080 || echo "Nothing listening on port 8080"
+
+      #     echo "=== Checking if port 8080 is in use ==="
+      #     lsof -i :8080 || echo "Port 8080 is not in use"
+
+      #     echo "=== Checking what's listening on port 8088 ==="
+      #     netstat -tlnp | grep :8088 || echo "Nothing listening on port 8088"
+
+      #     echo "=== Checking if port 8088 is in use ==="
+      #     lsof -i :8088 || echo "Port 8088 is not in use"
+      #     echo "=== Checking what's listening on port 8080 ==="
+      #     netstat -tlnp | grep :8080 || echo "Nothing listening on port 8080"
+
+      #     echo "=== Checking if port 8080 is in use ==="
+      #     lsof -i :8080 || echo "Port 8080 is not in use"
+      #   working-directory: ./ab
+
+      - name: Docker Compose Status & Logs
+        run: |
+          echo "=== Docker Compose ps (all services) ==="
+          docker compose ps -a
+          echo "=== Docker ps (all containers) ==="
+          docker ps -a
+          echo "=== db Container Check ==="
+          docker ps -a | grep -i db || echo "No db containers found"
+          echo "=== Docker Compose Config ==="
+          docker compose config | grep -A 10 "web:" || true
         working-directory: ./ab
 
       - name: Check out
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ab/test/e2e/cypress/e2e/kitchensink_app
 
-      # These next steps are to save our ablogs to file
-      - run: npm install pm2@latest -g
-        working-directory: ./ab
-      - name: Save Logs
-        run: pm2 start ./logs.js -- --toFile logs/ABServices.log
-        working-directory: ./ab
-
-      #Run test
-      - name: Wait for AB
-        uses: ifaxity/wait-on-action@v1.1.0
+      - name: Wait for test AB
+        uses: ifaxity/wait-on-action@v1.2.1
         with:
-          resource: http://localhost:8080
-          timeout: 300000
-          
+          resource: http://127.0.0.1:8088
+          timeout: 300000 # 5 minutes
+          delay: 5000 # Wait 5 seconds before starting to check
+          interval: 5000 # Check every 5 seconds
+          verbose: true
+
       - name: Run Cypress Tests
         run: npm run test:e2e:app -- --browser chrome
         working-directory: ./ab
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: cypress-screenshots
           path: ./ab/test/e2e/cypress/screenshots
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: ABServices.log
