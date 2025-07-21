@@ -6,7 +6,14 @@ on:
       ref:
         required: true
         type: string
+  push:
+    branches: [master]
+  # Run on pull requests into the #master branch
+  pull_request:
+    branches: [master]
 
+  # Allows user to trigger the workflow from GitHub's web UI
+  workflow_dispatch:
 jobs:
   cypress-test:
     name: Cypress E2E Tests
